@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c678d45d-27e5-4a5d-92a2-d21902892a36" >
+		<http:listener-connection host="localhost" port="8082" />
+	</http:listener-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="ca09d1b8-b9fe-4bfb-a4e5-14a6d1531d38" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="8d77cee4-27cb-4fbe-9e41-42577c56f0f5" >
+		<http:request-connection host="localhost" port="8082" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="1b270fbb-c1bb-41f3-bde8-90601f56b253" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="er3Flow" doc:id="0ca793e9-d7c9-4c4a-bfd1-136fee549822" >
+		<http:listener doc:name="Listener" doc:id="458a44c7-c938-424f-887d-b35b2c746869" config-ref="HTTP_Listener_config" path="/e"/>
+		<set-payload value="#['start']" doc:name="Set Payload" doc:id="7d496689-d34c-4763-a0ed-1faef7999347" />
+		<validation:is-blank-string doc:id="87db586f-224d-4d5a-b5b7-d285e29414e0" config-ref="Validation_Config" value="#[payload]"/>
+		<set-payload value="#['end']" doc:name="Set Payload" doc:id="57adfca2-1ec3-44dc-a5b2-a8848e376008" />
+	</flow>
+	<flow name="er3Flow1" doc:id="66745921-864f-42ca-ba0b-748c88035733" >
+		<http:listener doc:name="Listener" doc:id="4feee9f3-708a-4720-89b8-0007b10ee472" config-ref="HTTP_Listener_config" path="/e1"/>
+		<set-variable value='#[{first:"hema",last:"latha"}]' doc:name="Set Variable" doc:id="ed6e1e89-24a0-436c-a3d8-7ac0a180899f" variableName="customer"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b3effe9e-f6b7-44ac-a9a3-6b9b7b835ccf" message='#[vars."customer.first"]'/>
+	</flow>
+	<flow name="er3Flow2" doc:id="7f0ffbe1-a2a4-47ce-8caa-c6f22fd459af" >
+		<http:listener doc:name="Listener" doc:id="2be89ae6-1306-4af7-9bcb-d6080efbafeb" config-ref="HTTP_Listener_config" path="/e2"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="4245fa93-7ba0-4e45-99e2-fc3cadd23707" >
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="fa89932c-95db-4b93-acfb-fa75dda3100d" name="er3Flow3"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="2f4a91f8-b260-4974-aee7-7c77b388875a" name="er3Flow4"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="c4a28f10-00e1-4b11-820f-d28b8c9d12b3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="er3Flow3" doc:id="516003ba-23e7-421d-9acf-be29406d74e2" >
+		<set-payload value='#["200"]' doc:name="Set Payload" doc:id="1088c8f7-5c14-4e56-b4cb-a126245ed864" />
+	</flow>
+	<flow name="er3Flow4" doc:id="c6ec5078-b393-431c-b895-ffdbe84fa670" >
+		<set-payload value='#["100"]' doc:name="Set Payload" doc:id="87e3e8ef-46bd-4548-8596-ddaa990c1328" />
+	</flow>
+	<flow name="er3Flow5" doc:id="dc68153e-cec5-4b22-860a-4de77cde42d1" >
+		<http:listener doc:name="Listener" doc:id="7291b1ea-fd08-434e-b48d-691435ab8f8e" config-ref="HTTP_Listener_config1" path="/e5"/>
+		<set-variable value="#['red']" doc:name="Set Variable" doc:id="7eba7beb-47e3-4785-ba58-4c0b38379f99" variableName="color"/>
+		<set-payload value="#['red']" doc:name="Set Payload" doc:id="81ac8875-1736-4b85-b1d6-290549e177ef" />
+		<http:request method="POST" doc:name="Request" doc:id="55e8bc19-4ecd-4e5c-a136-f5557a1496f7" config-ref="HTTP_Request_configuration" path="/p"/>
+	</flow>
+	<flow name="er3Flow6" doc:id="bed3c0a2-4a31-4621-9593-c0cd7b87ce32" >
+		<http:listener doc:name="Listener" doc:id="5d7c55bb-fe60-4bc5-a677-979ae2a7ff61" config-ref="HTTP_Listener_config" path="/p"/>
+		<set-payload value="#[if(vars.color==null) 'white' else 'blue']" doc:name="Set Payload" doc:id="d5a98814-8534-43ba-a9ca-ce0a8249cc71" />
+	</flow>
+</mule>
